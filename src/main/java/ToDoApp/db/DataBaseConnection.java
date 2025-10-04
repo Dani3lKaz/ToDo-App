@@ -44,13 +44,9 @@ public class DataBaseConnection {
     public static void main(String[] args) {
         UserDao ud = new UserDao(getConnection());
         User u1 = new User("TestUserA", "12345");
-        User u2 = new User("TestUserB", "abcde");
-        User u3 = new User("TestUserC", "!@#$%");
 
         ud.addUser(u1);
-        ud.addUser(u2);
-        ud.addUser(u3);
 
-        System.out.println(ud.getUserById(1));
+        System.out.println(ud.getUserById(10));
     }
 }
