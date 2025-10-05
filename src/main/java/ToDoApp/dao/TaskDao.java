@@ -37,16 +37,17 @@ public class TaskDao {
         String sql = "SELECT * FROM TASKS WHERE id = ?";
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()){
-                return new Task(rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getDate("due_date").toLocalDate(),
-                        rs.getInt("project_id"),
-                        Task.TaskStatus.valueOf(rs.getString("status").toUpperCase()));
-            }else{
-                return null;
+            try(ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Task(rs.getInt("id"),
+                            rs.getString("title"),
+                            rs.getString("description"),
+                            rs.getDate("due_date").toLocalDate(),
+                            rs.getInt("project_id"),
+                            Task.TaskStatus.valueOf(rs.getString("status").toUpperCase()));
+                } else {
+                    return null;
+                }
             }
         }catch (SQLException e) {
             e.printStackTrace();
@@ -78,16 +79,17 @@ public class TaskDao {
         List<Task> taskList = new ArrayList<>();
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, projectId);
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()){
-                taskList.add(new Task(rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getDate("due_date").toLocalDate(),
-                        rs.getInt("project_id"),
-                        Task.TaskStatus.valueOf(rs.getString("status").toUpperCase())));
+            try(ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    taskList.add(new Task(rs.getInt("id"),
+                            rs.getString("title"),
+                            rs.getString("description"),
+                            rs.getDate("due_date").toLocalDate(),
+                            rs.getInt("project_id"),
+                            Task.TaskStatus.valueOf(rs.getString("status").toUpperCase())));
+                }
+                return taskList;
             }
-            return taskList;
         }catch (SQLException e) {
             e.printStackTrace();
             return taskList;
