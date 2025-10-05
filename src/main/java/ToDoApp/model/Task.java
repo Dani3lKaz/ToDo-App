@@ -10,13 +10,13 @@ public class Task {
     private LocalDate dueDate;
     private int projectId;
 
-    public Task(int id, String title, String description, LocalDate dueDate, int projectId) {
+    public Task(int id, String title, String description, LocalDate dueDate, int projectId, TaskStatus status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.projectId = projectId;
-        this.status = TaskStatus.NEW;
+        this.status = status;
     }
 
     public Task(String title, String description, LocalDate dueDate, int projectId) {
