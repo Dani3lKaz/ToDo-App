@@ -2,6 +2,7 @@ package ToDoApp.ui;
 
 import ToDoApp.dao.UserDao;
 import ToDoApp.model.User;
+import ToDoApp.utils.Email;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -40,8 +41,8 @@ public class UserView {
         TableColumn<User, String> nameCol = new TableColumn<>("Name");
         nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
 
-        TableColumn<User, String> passwordCol = new TableColumn<>("Password");
-        passwordCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPassword()));
+        TableColumn<User, String> emailCol = new TableColumn<>("Email");
+        emailCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEmail().toString()));
 
         TableColumn<User, Void> actionCol = new TableColumn<>("Action");
         actionCol.setCellFactory(col -> new TableCell<>() {
@@ -85,13 +86,16 @@ public class UserView {
         idCol.setMinWidth(50);
         idCol.setMaxWidth(50);
         nameCol.setPrefWidth(150);
-        passwordCol.setPrefWidth(200);
+        emailCol.setPrefWidth(200);
         actionCol.setPrefWidth(200);
 
-        table.getColumns().addAll(idCol, nameCol, passwordCol, actionCol);
+        table.getColumns().addAll(idCol, nameCol, emailCol, actionCol);
 
         TextField nameField = new TextField();
         nameField.setPromptText("Name");
+
+        TextField emailField = new TextField();
+        emailField.setPromptText("Email");
 
         TextField passwordField = new TextField();
         passwordField.setPromptText("Password");
@@ -99,13 +103,15 @@ public class UserView {
         Button addBtn = new Button("Add");
         addBtn.setOnAction(e -> {
             String name = nameField.getText();
+            Email email = new Email(emailField.getText());
             String password = passwordField.getText();
 
             if(name != null && password != null) {
-                User u = new User(name, password);
+                User u = new User(name, email, password);
                 dao.addUser(u);
                 userList.setAll(dao.getAllUsers());
                 nameField.clear();
+                emailField.clear();
                 passwordField.clear();
             }
         });
@@ -117,7 +123,7 @@ public class UserView {
         BorderPane root = new BorderPane();
         BorderPane menu = new BorderPane();
 
-        HBox form = new HBox(10, nameField, passwordField, addBtn);
+        HBox form = new HBox(10, nameField, emailField, passwordField, addBtn);
         form.setPadding(new Insets(15));
         root.setBottom(form);
 
