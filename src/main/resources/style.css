@@ -1,0 +1,70 @@
+.root {
+    -fx-background-color: #1E1E1E;
+    -fx-text-fill: #F5F5F5;
+}
+
+.table-view {
+    -fx-background-color: #2C2C2C;
+    -fx-border-color: #444;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8;
+    -fx-text-background-color: #F5F5F5;
+}
+.table-view .column-header {
+    -fx-background-color: #FFC107;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-font-size: 16;
+    -fx-font-family: "Impact";
+    -fx-text-fill: #1E1E1E;
+}
+
+.table-row-cell {
+    -fx-background-color: #2C2C2C;
+}
+.table-row-cell:odd {
+    -fx-background-color: #252525;
+}
+.table-cell {
+    -fx-alignment: CENTER;
+    -fx-font-size: 12;
+    -fx-font-family: "Verdana";
+}
+
+.title {
+    -fx-font-weight: bold;
+    -fx-font-size: 70;
+    -fx-font-family: "Impact";
+    -fx-text-fill: #FFC107;
+}
+
+.button {
+    -fx-background-color: #FFC107;
+    -fx-text-fill: #1E1E1E;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-pref-width: 120;
+    -fx-font-family: "Verdana";
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+}
+.button:hover {
+    -fx-background-color: #FFD54F;
+}
+
+.delete-btn {
+    -fx-background-color: #FF5252;
+    -fx-text-fill: #fff;
+    -fx-pref-width: 70;
+}
+.delete-btn:hover {
+    -fx-background-color: #FF867C;
+}
+
+.edit-btn {
+    -fx-pref-width: 70;
+}
+
