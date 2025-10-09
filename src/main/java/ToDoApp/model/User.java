@@ -1,18 +1,23 @@
 package ToDoApp.model;
 
+import ToDoApp.utils.Email;
+
 public class User {
     private int id;
     private String name;
+    private Email email;
     private String password;
 
-    public User(int id, String name, String password) {
+    public User(int id, String name,  Email email, String password) {
         this.id = id;
         this.name = name;
+        this.email = email;
         this.password = password;
     }
 
-    public User(String name, String password) {
+    public User(String name, Email email, String password) {
         this.name = name;
+        this.email = email;
         this.password = password;
     }
 
@@ -32,6 +37,14 @@ public class User {
         this.name = name;
     }
 
+    public Email getEmail() {
+        return email;
+    }
+
+    public void setEmail(Email email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -42,6 +55,11 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{id=" + id + ", name='" + name + "}";
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email=" + email +
+                ", password='" + password + '\'' +
+                '}';
     }
 }

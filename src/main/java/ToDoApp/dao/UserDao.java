@@ -1,6 +1,7 @@
 package ToDoApp.dao;
 
 import ToDoApp.model.User;
+import ToDoApp.utils.Email;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,10 +15,11 @@ public class UserDao {
     }
 
     public void addUser(User user) {
-        String sql = "INSERT INTO USERS (name, password) VALUES (?, ?)";
+        String sql = "INSERT INTO USERS (name, email, password) VALUES (?, ?, ?)";
         try(PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
             ps.setString(1, user.getName());
-            ps.setString(2, user.getPassword());
+            ps.setString(2, user.getEmail().toString());
+            ps.setString(3, user.getPassword());
             ps.executeUpdate();
 
             try(ResultSet rs = ps.getGeneratedKeys()) {
@@ -36,7 +38,8 @@ public class UserDao {
             ps.setInt(1, id);
             try(ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new User(rs.getInt("id"), rs.getString("name"), rs.getString("password"));
+                    return new User(rs.getInt("id"), rs.getString("name"),
+                            new Email(rs.getString("email")), rs.getString("password"));
                 } else {
                     return null;
                 }
@@ -54,6 +57,7 @@ public class UserDao {
             while (rs.next()) {
                 userList.add(new User(rs.getInt("id"),
                         rs.getString("name"),
+                        new Email(rs.getString("email")),
                         rs.getString("password")));
             }
             return userList;
@@ -64,11 +68,12 @@ public class UserDao {
     }
 
     public void updateUser(User user) {
-        String sql = "UPDATE USERS SET name = ?, password = ? WHERE id = ?";
+        String sql = "UPDATE USERS SET name = ?, email = ? password = ? WHERE id = ?";
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getName());
-            ps.setString(2, user.getPassword());
-            ps.setInt(3, user.getId());
+            ps.setString(2, user.getEmail().toString());
+            ps.setString(3, user.getPassword());
+            ps.setInt(4, user.getId());
             ps.executeUpdate();
         }catch (SQLException e){
             e.printStackTrace();
