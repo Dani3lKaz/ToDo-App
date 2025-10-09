@@ -2,6 +2,10 @@ package ToDoApp.dao;
 
 import ToDoApp.model.User;
 import ToDoApp.utils.Email;
+import ToDoApp.utils.ErrorDialog;
+import ToDoApp.utils.InvalidEmailAdressException;
+import ToDoApp.utils.InvalidPasswordException;
+import javafx.scene.control.Alert;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -38,8 +42,15 @@ public class UserDao {
             ps.setInt(1, id);
             try(ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new User(rs.getInt("id"), rs.getString("name"),
-                            new Email(rs.getString("email")), rs.getString("password"));
+                    try{
+                        User u = new User(rs.getInt("id"), rs.getString("name"),
+                                new Email(rs.getString("email")), rs.getString("password"));
+                        return u;
+                    }catch(InvalidPasswordException e) {
+                        ErrorDialog.showError("Invalid password!", "Password must be at least 8 characters long, contain one uppercase letter and one digit");
+                    }catch(InvalidEmailAdressException e) {
+                        ErrorDialog.showError("Invalid email adress!", "Email must be in format 'user@example.com'");
+                    }
                 } else {
                     return null;
                 }
@@ -48,6 +59,7 @@ public class UserDao {
             e.printStackTrace();
             return null;
         }
+        return null;
     }
 
     public List<User> getAllUsers() {

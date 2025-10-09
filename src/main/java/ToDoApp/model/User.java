@@ -1,6 +1,7 @@
 package ToDoApp.model;
 
 import ToDoApp.utils.Email;
+import ToDoApp.utils.InvalidPasswordException;
 
 public class User {
     private int id;
@@ -9,6 +10,9 @@ public class User {
     private String password;
 
     public User(int id, String name,  Email email, String password) {
+        if(!password.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$")) {
+            throw new InvalidPasswordException();
+        }
         this.id = id;
         this.name = name;
         this.email = email;
@@ -16,6 +20,9 @@ public class User {
     }
 
     public User(String name, Email email, String password) {
+        if(!password.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$")) {
+            throw new InvalidPasswordException();
+        }
         this.name = name;
         this.email = email;
         this.password = password;

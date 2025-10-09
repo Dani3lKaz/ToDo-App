@@ -3,6 +3,9 @@ package ToDoApp.ui;
 import ToDoApp.dao.UserDao;
 import ToDoApp.model.User;
 import ToDoApp.utils.Email;
+import ToDoApp.utils.ErrorDialog;
+import ToDoApp.utils.InvalidEmailAdressException;
+import ToDoApp.utils.InvalidPasswordException;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -103,12 +106,22 @@ public class UserView {
         Button addBtn = new Button("Add");
         addBtn.setOnAction(e -> {
             String name = nameField.getText();
-            Email email = new Email(emailField.getText());
+            Email email = null;
             String password = passwordField.getText();
 
-            if(name != null && password != null) {
-                User u = new User(name, email, password);
-                dao.addUser(u);
+            try {
+                email = new Email(emailField.getText());
+            }catch (InvalidEmailAdressException ee) {
+                ErrorDialog.showError("Invalid email adress!", "Email must be in format 'user@example.com'");
+            }
+
+            if(name != null && password != null && email != null) {
+                try {
+                    User u = new User(name, email, password);
+                    dao.addUser(u);
+                }catch (InvalidPasswordException pe) {
+                    ErrorDialog.showError("Invalid password!", "Password must be at least 8 characters long, contain one uppercase letter and one digit");
+                }
                 userList.setAll(dao.getAllUsers());
                 nameField.clear();
                 emailField.clear();
