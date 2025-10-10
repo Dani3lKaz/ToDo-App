@@ -6,6 +6,7 @@ import ToDoApp.utils.ErrorDialog;
 import ToDoApp.utils.InvalidEmailAdressException;
 import ToDoApp.utils.InvalidPasswordException;
 import javafx.scene.control.Alert;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class UserDao {
         try(PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail().toString());
-            ps.setString(3, user.getPassword());
+            ps.setString(3, BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
             ps.executeUpdate();
 
             try(ResultSet rs = ps.getGeneratedKeys()) {
@@ -42,15 +43,9 @@ public class UserDao {
             ps.setInt(1, id);
             try(ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    try{
-                        User u = new User(rs.getInt("id"), rs.getString("name"),
-                                new Email(rs.getString("email")), rs.getString("password"));
-                        return u;
-                    }catch(InvalidPasswordException e) {
-                        ErrorDialog.showError("Invalid password!", "Password must be at least 8 characters long, contain one uppercase letter and one digit");
-                    }catch(InvalidEmailAdressException e) {
-                        ErrorDialog.showError("Invalid email adress!", "Email must be in format 'user@example.com'");
-                    }
+                    User u = new User(rs.getInt("id"), rs.getString("name"),
+                            new Email(rs.getString("email")), rs.getString("password"));
+                    return u;
                 } else {
                     return null;
                 }
@@ -59,7 +54,6 @@ public class UserDao {
             e.printStackTrace();
             return null;
         }
-        return null;
     }
 
     public List<User> getAllUsers() {
@@ -84,7 +78,7 @@ public class UserDao {
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail().toString());
-            ps.setString(3, user.getPassword());
+            ps.setString(3, BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
             ps.setInt(4, user.getId());
             ps.executeUpdate();
         }catch (SQLException e){

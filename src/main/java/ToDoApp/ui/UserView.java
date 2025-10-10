@@ -50,7 +50,6 @@ public class UserView {
         TableColumn<User, Void> actionCol = new TableColumn<>("Action");
         actionCol.setCellFactory(col -> new TableCell<>() {
             private final Button delBtn = new Button("Delete");
-            private final Button editBtn = new Button("Edit");
             {
                 delBtn.getStyleClass().add("delete-btn");
                 delBtn.setOnAction(e -> {
@@ -59,28 +58,14 @@ public class UserView {
                     userList.setAll(dao.getAllUsers());
                 });
             }
-            {
-                editBtn.getStyleClass().add("edit-btn");
-                editBtn.setOnAction(e -> {
-                    User u = getTableView().getItems().get(getIndex());
 
-                    TextInputDialog dialog = new TextInputDialog(u.getName());
-                    dialog.setHeaderText("Edit username");
-                    dialog.setContentText("New name: ");
-                    dialog.showAndWait().ifPresent(newName -> {
-                        u.setName(newName);
-                        dao.updateUser(u);
-                        userList.setAll(dao.getAllUsers());
-                    });
-                });
-            }
             @Override
             protected void updateItem(Void item, boolean empty){
                 super.updateItem(item, empty);
                 if(empty) {
                     setGraphic(null);
                 }else{
-                    HBox box = new HBox(30, delBtn, editBtn);
+                    HBox box = new HBox(30, delBtn);
                     box.setAlignment(Pos.CENTER);
                     setGraphic(box);
                 }
@@ -119,13 +104,13 @@ public class UserView {
                 try {
                     User u = new User(name, email, password);
                     dao.addUser(u);
+                    nameField.clear();
+                    emailField.clear();
+                    passwordField.clear();
                 }catch (InvalidPasswordException pe) {
                     ErrorDialog.showError("Invalid password!", "Password must be at least 8 characters long, contain one uppercase letter and one digit");
                 }
                 userList.setAll(dao.getAllUsers());
-                nameField.clear();
-                emailField.clear();
-                passwordField.clear();
             }
         });
         addBtn.getStyleClass().add("add-btn");
