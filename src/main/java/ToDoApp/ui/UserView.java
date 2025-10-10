@@ -65,9 +65,7 @@ public class UserView {
                 if(empty) {
                     setGraphic(null);
                 }else{
-                    HBox box = new HBox(30, delBtn);
-                    box.setAlignment(Pos.CENTER);
-                    setGraphic(box);
+                    setGraphic(delBtn);
                 }
             }
         });
@@ -116,6 +114,9 @@ public class UserView {
         addBtn.getStyleClass().add("add-btn");
 
         Button projectsBtn = new Button("Projects");
+        projectsBtn.setOnAction(e -> {
+            new ProjectView(dao.getConnection()).show(stage);
+        });
         Button accountBtn = new Button("Your Account");
 
         BorderPane root = new BorderPane();
