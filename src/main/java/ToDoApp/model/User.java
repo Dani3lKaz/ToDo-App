@@ -10,9 +10,6 @@ public class User {
     private String password;
 
     public User(int id, String name,  Email email, String password) {
-        if(!password.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$")) {
-            throw new InvalidPasswordException();
-        }
         this.id = id;
         this.name = name;
         this.email = email;
@@ -56,7 +53,7 @@ public class User {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setHashPassword(String password) {
         this.password = password;
     }
 
@@ -66,7 +63,7 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email=" + email +
-                ", password='" + password + '\'' +
+                ", hashPassword='" + password + '\'' +
                 '}';
     }
 }
