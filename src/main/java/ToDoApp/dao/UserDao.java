@@ -2,10 +2,6 @@ package ToDoApp.dao;
 
 import ToDoApp.model.User;
 import ToDoApp.utils.Email;
-import ToDoApp.utils.ErrorDialog;
-import ToDoApp.utils.InvalidEmailAdressException;
-import ToDoApp.utils.InvalidPasswordException;
-import javafx.scene.control.Alert;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
@@ -17,6 +13,10 @@ public class UserDao {
 
     public UserDao(Connection connection) {
         this.connection = connection;
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 
     public void addUser(User user) {

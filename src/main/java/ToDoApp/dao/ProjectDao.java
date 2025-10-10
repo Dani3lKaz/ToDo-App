@@ -13,6 +13,10 @@ public class ProjectDao {
         this.connection = connection;
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
+
     public void addProject(Project project) {
         String sql = "INSERT INTO PROJECTS (name, user_id) VALUES (?, ?)";
         try(PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
