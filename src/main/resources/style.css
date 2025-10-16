@@ -41,6 +41,10 @@
     -fx-text-fill: #FFC107;
 }
 
+.title-account {
+    -fx-font-size: 40;
+}
+
 .button {
     -fx-background-color: #FFC107;
     -fx-text-fill: #1E1E1E;
@@ -66,5 +70,21 @@
 
 .edit-btn {
     -fx-pref-width: 70;
+}
+
+.login-label {
+    -fx-text-fill: #fff;
+    -fx-font-family: "Verdana";
+    -fx-font-weight: bold;
+    -fx-font-size: 12;
+}
+
+.menu {
+    -fx-background-color: linear-gradient(to right, #2c2c2c, #1e1e1e);
+    -fx-padding: 10 20;
+    -fx-alignment: center-left;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #444;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);
 }
 
