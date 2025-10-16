@@ -118,6 +118,9 @@ public class UserView {
             new ProjectView(dao.getConnection()).show(stage);
         });
         Button accountBtn = new Button("Your Account");
+        accountBtn.setOnAction(e -> {
+            new AccountScreen(dao.getConnection()).show(stage);
+        });
 
         BorderPane root = new BorderPane();
         BorderPane menu = new BorderPane();

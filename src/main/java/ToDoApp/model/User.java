@@ -10,6 +10,11 @@ public class User {
     private String password;
 
     public User(int id, String name,  Email email, String password) {
+        if(!password.startsWith("$2a$")){
+            if(!password.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$")) {
+                throw new InvalidPasswordException();
+            }
+        }
         this.id = id;
         this.name = name;
         this.email = email;

@@ -56,6 +56,25 @@ public class UserDao {
         }
     }
 
+    public User getUserByEmail(String email){
+        String sql = "SELECT * FROM USERS WHERE email = ?";
+        try(PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try(ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User u = new User(rs.getInt("id"), rs.getString("name"),
+                            new Email(rs.getString("email")), rs.getString("password"));
+                    return u;
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public List<User> getAllUsers() {
         String sql = "SELECT * FROM USERS";
         List<User> userList = new ArrayList<>();
@@ -74,7 +93,7 @@ public class UserDao {
     }
 
     public void updateUser(User user) {
-        String sql = "UPDATE USERS SET name = ?, email = ? password = ? WHERE id = ?";
+        String sql = "UPDATE USERS SET name = ?, email = ?, `password` = ? WHERE id = ?";
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail().toString());
