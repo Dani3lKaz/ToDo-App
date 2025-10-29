@@ -18,7 +18,7 @@ public class TaskDao {
         try(PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1, task.getTitle());
             ps.setString(2, task.getDescription());
-            ps.setString(3, task.getStatus());
+            ps.setString(3, task.getStatus().name());
             ps.setDate(4, Date.valueOf(task.getDueDate()));
             ps.setInt(5, task.getProjectId());
             ps.executeUpdate();
@@ -113,7 +113,7 @@ public class TaskDao {
             ps.setString(2, task.getDescription());
             ps.setDate(3, Date.valueOf(task.getDueDate()));
             ps.setInt(4, task.getProjectId());
-            ps.setString(5, task.getStatus());
+            ps.setString(5, task.getStatus().name());
             ps.setInt(6, task.getId());
             ps.executeUpdate();
         }catch (SQLException e) {

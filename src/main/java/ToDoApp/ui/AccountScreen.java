@@ -68,7 +68,7 @@ public class AccountScreen {
         PasswordField passField = new PasswordField();
         passField.setDisable(true);
 
-        Label cPassLabel = new Label(" Confirm password:");
+        Label cPassLabel = new Label("Confirm password:");
         cPassLabel.getStyleClass().add("login-label");
         PasswordField cPassField = new PasswordField();
         cPassField.setDisable(true);

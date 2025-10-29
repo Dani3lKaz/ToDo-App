@@ -55,8 +55,8 @@ public class Task {
         }
     }
 
-    public String getStatus() {
-        return status.name();
+    public TaskStatus getStatus() {
+        return status;
     }
 
     public void setStatus(String status) {
@@ -95,6 +95,5 @@ public class Task {
         NEW,
         IN_PROGRESS,
         DONE,
-        CANCELLED
     }
 }

@@ -20,8 +20,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         Connection connection = DataBaseConnection.getConnection();
-        //SessionManager.setCurrentUser(new User(1,"test", new Email("testemail@gmail.com"), "Password123"));
-        //new AccountScreen(connection).show(stage);
-        new LoginScreen(connection).show(stage);
+        SessionManager.setCurrentUser(new User(1,"Admin", new Email("admin@mail.com"), "Admin123"));
+        new AccountScreen(connection).show(stage);
+        //new LoginScreen(connection).show(stage);
     }
 }

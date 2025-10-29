@@ -50,13 +50,21 @@ public class ProjectView {
 
         TableColumn<Project, Void> actionCol = new TableColumn<>("Action");
         actionCol.setCellFactory(col -> new TableCell<>() {
+            private final Button tasksBtn = new Button("Tasks");
             private final Button delBtn = new Button("Delete");
+            private final HBox btnBox = new HBox(10, tasksBtn, delBtn);
             {
+                btnBox.setAlignment(Pos.CENTER);
                 delBtn.getStyleClass().add("delete-btn");
+
                 delBtn.setOnAction(e -> {
                     Project p = getTableView().getItems().get(getIndex());
                     dao.deleteProject(p.getId());
                     projectList.setAll(dao.getAllProjects());
+                });
+
+                tasksBtn.setOnAction(e -> {
+                    new TaskView(dao.getConnection(), dao.getProjectById(getTableView().getItems().get(getIndex()).getId())).show(stage);
                 });
             }
 
@@ -66,7 +74,7 @@ public class ProjectView {
                 if(empty) {
                     setGraphic(null);
                 }else{
-                    setGraphic(delBtn);
+                    setGraphic(btnBox);
                 }
             }
         });
