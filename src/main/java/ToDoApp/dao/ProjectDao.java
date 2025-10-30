@@ -18,10 +18,10 @@ public class ProjectDao {
     }
 
     public void addProject(Project project) {
-        String sql = "INSERT INTO PROJECTS (name, user_id) VALUES (?, ?)";
+        String sql = "INSERT INTO PROJECTS (name, description) VALUES (?, ?)";
         try(PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, project.getName());
-            ps.setInt(2, project.getUserId());
+            ps.setString(2, project.getDescription());
             ps.executeUpdate();
             try(ResultSet rs = ps.getGeneratedKeys()) {
                 if(rs.next()) {
@@ -41,7 +41,8 @@ public class ProjectDao {
                 if(rs.next()){
                     return new Project(rs.getInt("id"),
                             rs.getString("name"),
-                            rs.getInt("user_id"));
+                            rs.getString("description"),
+                            rs.getInt("tasks"));
                 }else{
                     return null;
                 }
@@ -59,7 +60,8 @@ public class ProjectDao {
             while(rs.next()) {
                 projectList.add(new Project(rs.getInt("id"),
                         rs.getString("name"),
-                        rs.getInt("user_id")));
+                        rs.getString("description"),
+                        rs.getInt("tasks")));
             }
             return projectList;
         }catch(SQLException e) {
@@ -69,10 +71,10 @@ public class ProjectDao {
     }
 
     public void updateProject(Project project) {
-        String sql = "UPDATE PROJECTS SET name = ?, user_id = ? WHERE id = ?";
+        String sql = "UPDATE PROJECTS SET name = ?, description = ? WHERE id = ?";
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, project.getName());
-            ps.setInt(2, project.getUserId());
+            ps.setString(2, project.getDescription());
             ps.setInt(3, project.getId());
             ps.executeUpdate();
         }catch(SQLException e) {

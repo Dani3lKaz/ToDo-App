@@ -2,8 +2,10 @@ package ToDoApp.ui;
 
 import ToDoApp.dao.ProjectDao;
 import ToDoApp.dao.TaskDao;
+import ToDoApp.dao.UserDao;
 import ToDoApp.model.Project;
 import ToDoApp.model.Task;
+import ToDoApp.model.User;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,6 +19,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.sql.Connection;
 import java.time.LocalDate;
@@ -24,6 +27,7 @@ import java.time.LocalDate;
 public class TaskView {
     private final TaskDao dao;
     private final ProjectDao projectDao;
+    private final UserDao userDao;
     private final ObservableList<Task> taskList;
     private final Project project;
 
@@ -31,6 +35,7 @@ public class TaskView {
         this.project = project;
         this.dao = new TaskDao(connection);
         this.projectDao = new ProjectDao(connection);
+        this.userDao = new UserDao(connection);
         this.taskList = FXCollections.observableArrayList(dao.getTaskbyProjectId(project.getId()));
     }
 
@@ -81,6 +86,9 @@ public class TaskView {
         TableColumn<Task, String> projectCol = new TableColumn<>("Project");
         projectCol.setCellValueFactory(data -> new SimpleStringProperty(projectDao.getProjectById(data.getValue().getProjectId()).getName()));
 
+        TableColumn<Task, String> userCol = new TableColumn<>("Assigned to");
+        userCol.setCellValueFactory(data -> new SimpleStringProperty(userDao.getUserById(data.getValue().getUserId()).getName()));
+
         TableColumn<Task, Void> actionCol = new TableColumn<>("Action");
         actionCol.setCellFactory(col -> new TableCell<>() {
             private final Button delBtn = new Button("Delete");
@@ -116,9 +124,10 @@ public class TaskView {
         descriptionCol.setPrefWidth(200);
         statusCol.setPrefWidth(100);
         deadlineCol.setPrefWidth(100);
-        projectCol.setPrefWidth(150);
+        projectCol.setPrefWidth(100);
+        userCol.setPrefWidth(100);
         actionCol.setPrefWidth(100);
-        table.getColumns().addAll(idCol, titleCol, descriptionCol, statusCol, deadlineCol, projectCol, actionCol);
+        table.getColumns().addAll(idCol, titleCol, descriptionCol, statusCol, deadlineCol, projectCol, userCol, actionCol);
 
         Button projectsBtn = new Button("Projects");
         projectsBtn.setOnAction(e -> {
@@ -147,6 +156,23 @@ public class TaskView {
         TextField descField =  new TextField();
         descField.setPromptText("Description");
 
+        ChoiceBox<User> userBox = new ChoiceBox<>();
+        userBox.getItems().addAll(userDao.getAllUsers());
+        userBox.setPrefWidth(100);
+        userBox.setConverter(new StringConverter<>() {
+
+            @Override
+            public String toString(User user) {
+                if(user == null) return "";
+                return user.getName();
+            }
+
+            @Override
+            public User fromString(String s) {
+                return null;
+            }
+        });
+
         DatePicker deadlineField = new DatePicker();
         deadlineField.setPromptText("Deadline");
 
@@ -156,9 +182,10 @@ public class TaskView {
             String description = descField.getText();
             LocalDate dueDate = deadlineField.getValue();
             int projectId = project.getId();
+            int user_id = userBox.getValue().getId();
 
             if(!title.isEmpty() &&  !description.isEmpty() && dueDate.isAfter(LocalDate.now())) {
-                Task t = new Task(title, description, dueDate, projectId);
+                Task t = new Task(title, description, dueDate, projectId, user_id);
                 dao.addTask(t);
                 taskList.setAll(dao.getTaskbyProjectId(projectId));
                 titleField.clear();
@@ -167,7 +194,7 @@ public class TaskView {
 
         });
 
-        HBox form = new HBox(10, titleField, descField, deadlineField, addBtn);
+        HBox form = new HBox(10, titleField, descField, deadlineField, userBox, addBtn);
         form.setPadding(new Insets(15));
         root.setBottom(form);
 

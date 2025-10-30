@@ -3,17 +3,21 @@ package ToDoApp.model;
 public class Project {
     private int id;
     private String name;
-    private int userId;
+    private String description;
+    private int tasksCount;
 
-    public Project(int id, String name, int userId) {
+    public Project(int id, String name, String description, int tasksCount) {
         this.id = id;
         this.name = name;
-        this.userId = userId;
+        this.description = description;
+        this.tasksCount = tasksCount;
     }
 
-    public Project(String name, int userId) {
+
+    public Project(String name, String description) {
         this.name = name;
-        this.userId = userId;
+        this.description = description;
+        this.tasksCount = 0;
     }
 
     public int getId() {
@@ -32,12 +36,20 @@ public class Project {
         this.name = name;
     }
 
-    public int getUserId() {
-        return userId;
+    public String getDescription() {
+        return description;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getTasksCount() {
+        return tasksCount;
+    }
+
+    public void setTasksCount(int tasksCount) {
+        this.tasksCount = tasksCount;
     }
 
     @Override
@@ -45,7 +57,8 @@ public class Project {
         return "Project{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", userId=" + userId +
+                ", description='" + description + '\'' +
+                ", tasksCount=" + tasksCount +
                 '}';
     }
 }

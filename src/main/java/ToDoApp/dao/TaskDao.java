@@ -14,13 +14,14 @@ public class TaskDao {
     }
 
     public void addTask(Task task) {
-        String sql = "INSERT INTO TASKS (title, description, status, due_date, project_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TASKS (title, description, status, due_date, project_id, user_id) VALUES (?, ?, ?, ?, ?, ?)";
         try(PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1, task.getTitle());
             ps.setString(2, task.getDescription());
             ps.setString(3, task.getStatus().name());
             ps.setDate(4, Date.valueOf(task.getDueDate()));
             ps.setInt(5, task.getProjectId());
+            ps.setInt(6, task.getUserId());
             ps.executeUpdate();
 
             try(ResultSet rs = ps.getGeneratedKeys()) {
@@ -44,6 +45,7 @@ public class TaskDao {
                             rs.getString("description"),
                             rs.getDate("due_date").toLocalDate(),
                             rs.getInt("project_id"),
+                            rs.getInt("user_id"),
                             Task.TaskStatus.valueOf(rs.getString("status").toUpperCase()));
                 } else {
                     return null;
@@ -65,6 +67,7 @@ public class TaskDao {
                         rs.getString("description"),
                         rs.getDate("due_date").toLocalDate(),
                         rs.getInt("project_id"),
+                        rs.getInt("user_id"),
                         Task.TaskStatus.valueOf(rs.getString("status").toUpperCase())));
             }
             return taskList;
@@ -86,6 +89,7 @@ public class TaskDao {
                             rs.getString("description"),
                             rs.getDate("due_date").toLocalDate(),
                             rs.getInt("project_id"),
+                            rs.getInt("user_id"),
                             Task.TaskStatus.valueOf(rs.getString("status").toUpperCase())));
                 }
                 return taskList;

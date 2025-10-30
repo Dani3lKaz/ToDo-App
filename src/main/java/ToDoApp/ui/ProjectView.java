@@ -41,12 +41,11 @@ public class ProjectView {
         TableColumn<Project, String> nameCol = new TableColumn<>("Project name");
         nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
 
-        TableColumn<Project, String> userCol = new TableColumn<>("User");
-        userCol.setCellValueFactory(data -> {
-                int userId = data.getValue().getUserId();
-                User u = userDao.getUserById(userId);
-                return new SimpleStringProperty(u.getName());
-        });
+        TableColumn<Project, String> descCol = new TableColumn<>("Description");
+        descCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDescription()));
+
+        TableColumn<Project, Integer> tasksCol = new TableColumn<>("Tasks");
+        tasksCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getTasksCount()).asObject());
 
         TableColumn<Project, Void> actionCol = new TableColumn<>("Action");
         actionCol.setCellFactory(col -> new TableCell<>() {
@@ -82,38 +81,28 @@ public class ProjectView {
         idCol.setMinWidth(50);
         idCol.setMaxWidth(50);
         nameCol.setPrefWidth(200);
-        userCol.setPrefWidth(200);
-        actionCol.setPrefWidth(100);
-        table.getColumns().addAll(idCol, nameCol, userCol, actionCol);
+        descCol.setPrefWidth(300);
+        tasksCol.setMinWidth(50);
+        tasksCol.setMaxWidth(50);
+        actionCol.setPrefWidth(200);
+        table.getColumns().addAll(idCol, nameCol, descCol, tasksCol, actionCol);
 
         TextField nameField = new TextField();
         nameField.setPromptText("Project name");
-        nameField.setPrefWidth(300);
+        nameField.setPrefWidth(200);
 
-        ChoiceBox<User> userBox = new ChoiceBox<>();
-        userBox.getItems().addAll(userDao.getAllUsers());
-        userBox.setPrefWidth(200);
-        userBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(User user) {
-                if (user == null) return "";
-                return user.getName();
-            }
-
-            @Override
-            public User fromString(String string) {
-                return null;
-            }
-        });
+        TextField descField = new TextField();
+        descField.setPromptText("Project description");
+        descField.setPrefWidth(400);
 
         Button addBtn = new Button("Add");
         addBtn.getStyleClass().add("add-btn");
         addBtn.setOnAction(e -> {
             String name = nameField.getText();
-            int userId = userBox.getValue().getId();
+            String desc = descField.getText();
 
             if(name != null && name != "") {
-                Project p = new Project(name, userId);
+                Project p = new Project(name, desc);
                 dao.addProject(p);
                 nameField.clear();
                 projectList.setAll(dao.getAllProjects());
@@ -129,7 +118,7 @@ public class ProjectView {
         BorderPane root = new BorderPane();
         BorderPane menu = new BorderPane();
 
-        HBox form = new HBox(10, nameField, userBox, addBtn);
+        HBox form = new HBox(10, nameField, descField, addBtn);
         form.setPadding(new Insets(15));
         root.setBottom(form);
 

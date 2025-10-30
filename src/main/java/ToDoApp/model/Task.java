@@ -9,21 +9,24 @@ public class Task {
     private TaskStatus status;
     private LocalDate dueDate;
     private int projectId;
+    private int userId;
 
-    public Task(int id, String title, String description, LocalDate dueDate, int projectId, TaskStatus status) {
+    public Task(int id, String title, String description, LocalDate dueDate, int projectId, int userId, TaskStatus status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.projectId = projectId;
+        this.userId = userId;
         this.status = status;
     }
 
-    public Task(String title, String description, LocalDate dueDate, int projectId) {
+    public Task(String title, String description, LocalDate dueDate, int projectId, int userId) {
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.projectId = projectId;
+        this.userId = userId;
         this.status = TaskStatus.NEW;
     }
 
@@ -77,6 +80,14 @@ public class Task {
 
     public void setProjectId(int projectId) {
         this.projectId = projectId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     @Override
