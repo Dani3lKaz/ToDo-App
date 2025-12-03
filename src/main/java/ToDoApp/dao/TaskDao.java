@@ -100,6 +100,29 @@ public class TaskDao {
         }
     }
 
+    public List<Task> getTaskbyUserId(int userId){
+        String sql = "SELECT * FROM TASKS WHERE user_id = ?";
+        List<Task> taskList = new ArrayList<>();
+        try(PreparedStatement ps = connection.prepareStatement(sql)){
+            ps.setInt(1, userId);
+            try(ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    taskList.add(new Task(rs.getInt("id"),
+                            rs.getString("title"),
+                            rs.getString("description"),
+                            rs.getDate("due_date").toLocalDate(),
+                            rs.getInt("project_id"),
+                            rs.getInt("user_id"),
+                            Task.TaskStatus.valueOf(rs.getString("status").toUpperCase())));
+                }
+                return taskList;
+            }
+        }catch (SQLException e) {
+            e.printStackTrace();
+            return taskList;
+        }
+    }
+
     public void deleteTask(int id) {
         String sql = "DELETE FROM TASKS WHERE id = ?";
         try(PreparedStatement ps = connection.prepareStatement(sql)) {
