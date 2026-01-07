@@ -8,8 +8,9 @@ public class User {
     private String name;
     private Email email;
     private String password;
+    private Role role;
 
-    public User(int id, String name,  Email email, String password) {
+    public User(int id, String name,  Email email, String password, Role role) {
         if(!password.startsWith("$2a$")){
             if(!password.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$")) {
                 throw new InvalidPasswordException();
@@ -19,6 +20,7 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
     public User(String name, Email email, String password) {
@@ -62,6 +64,14 @@ public class User {
         this.password = password;
     }
 
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -70,5 +80,10 @@ public class User {
                 ", email=" + email +
                 ", hashPassword='" + password + '\'' +
                 '}';
+    }
+
+    public enum Role {
+        USER,
+        ADMIN
     }
 }

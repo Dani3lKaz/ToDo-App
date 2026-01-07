@@ -17,10 +17,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LoginScreen {
-    private Connection connection;
-    public LoginScreen(Connection connection){
+    private static final Logger logger = Logger.getLogger(LoginScreen.class.getName());
+    private final Connection connection;
+
+    public LoginScreen(Connection connection) {
         this.connection = connection;
     }
 
@@ -29,143 +34,169 @@ public class LoginScreen {
         Label title = new Label("To-Do App");
         title.getStyleClass().add("title");
 
+        // Login Pane
         Label loginEmailLabel = new Label("Email:");
         loginEmailLabel.getStyleClass().add("login-label");
         TextField loginEmailField = new TextField();
+        loginEmailField.setPromptText("Enter your email");
 
         Label loginPassLabel = new Label("Password:");
         loginPassLabel.getStyleClass().add("login-label");
         PasswordField loginPassField = new PasswordField();
+        loginPassField.setPromptText("Enter your password");
 
+        GridPane logInContent = new GridPane();
+        logInContent.setAlignment(Pos.CENTER);
+        logInContent.setHgap(10);
+        logInContent.setVgap(15);
+        logInContent.add(loginEmailLabel, 0, 0);
+        logInContent.add(loginEmailField, 1, 0);
+        logInContent.add(loginPassLabel, 0, 1);
+        logInContent.add(loginPassField, 1, 1);
+
+        // Sign Up Pane
         Label nameLabel = new Label("Name:");
         nameLabel.getStyleClass().add("login-label");
         TextField nameField = new TextField();
+        nameField.setPromptText("Enter your name");
 
         Label emailLabel = new Label("Email:");
         emailLabel.getStyleClass().add("login-label");
         TextField emailField = new TextField();
+        emailField.setPromptText("Enter your email");
 
         Label passLabel = new Label("Password:");
         passLabel.getStyleClass().add("login-label");
         PasswordField passField = new PasswordField();
+        passField.setPromptText("Create a password");
 
-        Label cPassLabel = new Label("Confirm password:");
+        Label cPassLabel = new Label("Confirm:");
         cPassLabel.getStyleClass().add("login-label");
         PasswordField cPassField = new PasswordField();
+        cPassField.setPromptText("Confirm your password");
 
+        GridPane signUpContent = new GridPane();
+        signUpContent.setAlignment(Pos.CENTER);
+        signUpContent.setHgap(10);
+        signUpContent.setVgap(15);
+        signUpContent.add(nameLabel, 0, 0);
+        signUpContent.add(nameField, 1, 0);
+        signUpContent.add(emailLabel, 0, 1);
+        signUpContent.add(emailField, 1, 1);
+        signUpContent.add(passLabel, 0, 2);
+        signUpContent.add(passField, 1, 2);
+        signUpContent.add(cPassLabel, 0, 3);
+        signUpContent.add(cPassField, 1, 3);
+
+        // Buttons
         Button loginBtn = new Button("Log in");
         Button signUpBtn = new Button("Sign up");
+        // Make buttons same width
+        loginBtn.setPrefWidth(100);
+        signUpBtn.setPrefWidth(100);
 
         HBox buttons = new HBox(20, loginBtn, signUpBtn);
         buttons.setAlignment(Pos.CENTER);
 
-        GridPane logInPane = new GridPane();
-        logInPane.setAlignment(Pos.CENTER);
-        logInPane.setHgap(10);
-        logInPane.setVgap(15);
-        logInPane.add(loginEmailLabel, 0, 0);
-        logInPane.add(loginEmailField, 1, 0);
-        logInPane.add(loginPassLabel, 0, 1);
-        logInPane.add(loginPassField, 1, 1);
+        // Card Container
+        VBox card = new VBox(20);
+        card.getStyleClass().add("card");
+        card.setMaxWidth(400);
+        card.setAlignment(Pos.CENTER);
 
-        GridPane signUpPane = new GridPane();
-        signUpPane.setAlignment(Pos.CENTER);
-        signUpPane.setHgap(10);
-        signUpPane.setVgap(15);
-        signUpPane.add(nameLabel, 0, 0);
-        signUpPane.add(nameField, 1, 0);
-        signUpPane.add(emailLabel, 0, 1);
-        signUpPane.add(emailField, 1, 1);
-        signUpPane.add(passLabel, 0, 2);
-        signUpPane.add(passField, 1, 2);
-        signUpPane.add(cPassLabel, 0, 3);
-        signUpPane.add(cPassField, 1, 3);
+        // Initial State
+        card.getChildren().addAll(title, logInContent, buttons);
 
-        VBox form = new VBox(20, title, logInPane, signUpPane, buttons);
-        signUpPane.setVisible(false);
-        signUpPane.setManaged(false);
-        form.setAlignment(Pos.CENTER);
-        StackPane root = new StackPane(form);
+        final boolean[] isSignUpMode = { false };
 
-        final boolean isSingUpMode[] = {false};
-        loginBtn.setOnAction(e -> {
-            if(isSingUpMode[0]){
-                isSingUpMode[0] = false;
-                signUpPane.setVisible(false);
-                signUpPane.setManaged(false);
-                logInPane.setVisible(true);
-                logInPane.setManaged(true);
+        loginBtn.setOnAction(_ -> {
+            if (isSignUpMode[0]) {
+                // Switch to Login Mode from Sign Up Mode
+                isSignUpMode[0] = false;
+                card.getChildren().clear();
+                card.getChildren().addAll(title, logInContent, buttons);
                 loginBtn.setText("Log in");
-
-            }else {
+                signUpBtn.setText("Sign up");
+            } else {
+                // Perform Login
                 if (validateLogin(loginEmailField.getText(), loginPassField.getText())) {
                     User u = new UserDao(connection).getUserByEmail(loginEmailField.getText());
+                    logger.log(Level.INFO, "User logged in successfully: userId={0}", u.getId());
                     SessionManager.setCurrentUser(u);
-                    new UserView(connection).show(stage);
+                    new ProjectView(connection).show(stage); // Redirect to Project View initially
                 } else {
                     ErrorDialog.showError("Login failed!", "Invalid email or password");
+                    logger.log(Level.WARNING, "Failed login attempt: username={0}", loginEmailField.getText());
                     loginEmailField.clear();
                     loginPassField.clear();
                 }
             }
         });
 
-        signUpBtn.setOnAction(e -> {
-            if(!isSingUpMode[0]){
-                isSingUpMode[0] = true;
-                logInPane.setVisible(false);
-                logInPane.setManaged(false);
-                signUpPane.setVisible(true);
-                signUpPane.setManaged(true);
+        signUpBtn.setOnAction(_ -> {
+            if (!isSignUpMode[0]) {
+                // Switch to Sign Up Mode
+                isSignUpMode[0] = true;
+
+                card.getChildren().clear();
+                card.getChildren().addAll(title, signUpContent, buttons);
+
                 loginBtn.setText("Back");
-            }else{
-                if(nameField.getText().isEmpty()) {
+                signUpBtn.setText("Register");
+            } else {
+                // Perform Registration
+                if (nameField.getText().isEmpty()) {
                     ErrorDialog.showError("Validation error", "Name cannot be empty!");
                     return;
                 }
-                if(emailField.getText().isEmpty()) {
+                if (emailField.getText().isEmpty()) {
                     ErrorDialog.showError("Validation error", "Email cannot be empty!");
                     return;
                 }
-                if(!passField.getText().equals(cPassField.getText())) {
+                if (!passField.getText().equals(cPassField.getText())) {
                     ErrorDialog.showError("Validation error", "Passwords do not match!");
                     return;
                 }
-                try{
+                try {
                     User user = new User(nameField.getText(),
                             new Email(emailField.getText()), passField.getText());
                     new UserDao(connection).addUser(user);
+                    logger.log(Level.INFO, "User signed up successfully: userID={0}",
+                            new UserDao(connection).getUserByEmail(emailField.getText()).getId());
                     SessionManager.setCurrentUser(user);
-                    new UserView(connection).show(stage);
-                }catch (InvalidEmailAdressException ee) {
+                    new ProjectView(connection).show(stage);
+                } catch (InvalidEmailAdressException ee) {
                     ErrorDialog.showError("Validation error", "Email must be in format 'user@example.com'");
-                }catch (InvalidPasswordException pe) {
-                    ErrorDialog.showError("Invalid password!", "Password must be at least 8 characters long, contain one uppercase letter and one digit");
+                } catch (InvalidPasswordException pe) {
+                    ErrorDialog.showError("Invalid password!",
+                            "Password must be at least 8 characters long, contain one uppercase letter and one digit");
                 }
             }
         });
 
+        StackPane root = new StackPane(card);
+        root.getStyleClass().add("root");
+
         Scene scene = new Scene(root, 800, 600);
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
         stage.setScene(scene);
-        stage.setTitle("To-Do App");
+        stage.setTitle("To-Do App - Login");
         stage.show();
     }
 
     private boolean validateLogin(String email, String password) {
         String sql = "SELECT * FROM USERS WHERE email = ?";
-        try(PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
-            try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next()) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
                     String dbHash = rs.getString("password");
                     return BCrypt.checkpw(password, dbHash);
                 }
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
 }
-

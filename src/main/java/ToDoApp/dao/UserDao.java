@@ -43,8 +43,12 @@ public class UserDao {
             ps.setInt(1, id);
             try(ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    User u = new User(rs.getInt("id"), rs.getString("name"),
-                            new Email(rs.getString("email")), rs.getString("password"));
+                    User u = new User(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            new Email(rs.getString("email")),
+                            rs.getString("password"),
+                            User.Role.valueOf(rs.getString("role")));
                     return u;
                 } else {
                     return null;
@@ -62,8 +66,12 @@ public class UserDao {
             ps.setString(1, email);
             try(ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    User u = new User(rs.getInt("id"), rs.getString("name"),
-                            new Email(rs.getString("email")), rs.getString("password"));
+                    User u = new User(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            new Email(rs.getString("email")),
+                            rs.getString("password"),
+                            User.Role.valueOf(rs.getString("role")));
                     return u;
                 } else {
                     return null;
@@ -80,10 +88,12 @@ public class UserDao {
         List<User> userList = new ArrayList<>();
         try(PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                userList.add(new User(rs.getInt("id"),
+                userList.add(new User(
+                        rs.getInt("id"),
                         rs.getString("name"),
                         new Email(rs.getString("email")),
-                        rs.getString("password")));
+                        rs.getString("password"),
+                        User.Role.valueOf(rs.getString("role"))));
             }
             return userList;
         }catch (SQLException e){

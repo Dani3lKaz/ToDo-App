@@ -16,9 +16,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
+import java.util.Objects;
 
 public class AccountScreen {
-    private Connection connection;
+    private final Connection connection;
 
     public AccountScreen(Connection connection) {
         this.connection = connection;
@@ -29,15 +30,12 @@ public class AccountScreen {
         title.getStyleClass().add("title");
 
         Button usersBtn = new Button("Users");
-        usersBtn.setOnAction(e -> {
-            new UserView(connection).show(stage);
-        });
+        usersBtn.setOnAction(_ -> new UserView(connection).show(stage));
         Button projectsBtn = new Button("Projects");
-        projectsBtn.setOnAction(e -> {
-            new ProjectView(connection).show(stage);
-        });
-        Button tasksBtn = new Button("Tasks");
-        HBox menuButtons = new HBox(50, usersBtn, projectsBtn, tasksBtn);
+        projectsBtn.setOnAction(_ -> new ProjectView(connection).show(stage));
+        Button logOutBtn = new Button("Log out");
+        logOutBtn.setOnAction(_ -> new LoginScreen(connection).show(stage));
+        HBox menuButtons = new HBox(50, usersBtn, projectsBtn, logOutBtn);
         menuButtons.getStyleClass().add("menu");
         menuButtons.setAlignment(Pos.CENTER);
 
@@ -78,8 +76,8 @@ public class AccountScreen {
         Button saveBtn = new Button("Save");
         saveBtn.setDisable(true);
 
-        final boolean editMode[] = {false};
-        editBtn.setOnAction(e -> {
+        final boolean[] editMode = {false};
+        editBtn.setOnAction(_ -> {
             if(!editMode[0]) {
                 nameField.setDisable(false);
                 emailField.setDisable(false);
@@ -103,7 +101,7 @@ public class AccountScreen {
             }
         });
 
-        saveBtn.setOnAction(e -> {
+        saveBtn.setOnAction(_ -> {
             if(nameField.getText().isEmpty()) {
                 ErrorDialog.showError("Validation error", "Name cannot be empty!");
                 return;
@@ -118,7 +116,7 @@ public class AccountScreen {
             }
             try{
                 User user = new User(SessionManager.getCurrentUser().getId(), nameField.getText(),
-                            new Email(emailField.getText()), passField.getText());
+                            new Email(emailField.getText()), passField.getText(), SessionManager.getCurrentUser().getRole());
                 new UserDao(connection).updateUser(user);
                 SessionManager.setCurrentUser(user);
                 nameField.setDisable(true);
@@ -159,7 +157,7 @@ public class AccountScreen {
         StackPane root = new StackPane(mainBox);
 
         Scene scene = new Scene(root, 800, 600);
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
         stage.setScene(scene);
         stage.setTitle("To-Do App");
         stage.show();

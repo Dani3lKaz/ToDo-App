@@ -1,11 +1,9 @@
 package ToDoApp.ui;
 
+import ToDoApp.dao.ProjectDao;
 import ToDoApp.dao.UserDao;
 import ToDoApp.model.User;
-import ToDoApp.utils.Email;
-import ToDoApp.utils.ErrorDialog;
-import ToDoApp.utils.InvalidEmailAdressException;
-import ToDoApp.utils.InvalidPasswordException;
+import ToDoApp.utils.*;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -14,32 +12,57 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-
-
 import java.sql.Connection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserView {
+    private static final Logger logger = Logger.getLogger(UserView.class.getName());
     private final UserDao dao;
+    private final ProjectDao projectDao;
     private final ObservableList<User> userList;
 
     public UserView(Connection connection) {
         this.dao = new UserDao(connection);
+        this.projectDao = new ProjectDao(connection);
         this.userList = FXCollections.observableArrayList(dao.getAllUsers());
     }
 
     public void show(Stage stage) {
+        BorderPane root = new BorderPane();
+        root.getStyleClass().add("root");
+
+        // Top Menu
+        HBox menu = new HBox(20);
+        menu.getStyleClass().add("menu-bar");
+        menu.setAlignment(Pos.CENTER_LEFT);
+
+        Label title = new Label("Users");
+        title.getStyleClass().add("title");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button projectsBtn = new Button("Projects");
+        projectsBtn.setOnAction(e -> new ProjectView(dao.getConnection()).show(stage));
+
+        Button accountBtn = new Button("Account");
+        accountBtn.setOnAction(e -> new AccountScreen(dao.getConnection()).show(stage));
+
+        menu.getChildren().addAll(title, spacer, projectsBtn, accountBtn);
+        root.setTop(menu);
+
+        // Center Table
         TableView<User> table = new TableView<>(userList);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        VBox.setVgrow(table, Priority.ALWAYS);
 
         TableColumn<User, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
+        idCol.setPrefWidth(50);
 
         TableColumn<User, String> nameCol = new TableColumn<>("Name");
         nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
@@ -47,110 +70,100 @@ public class UserView {
         TableColumn<User, String> emailCol = new TableColumn<>("Email");
         emailCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEmail().toString()));
 
-        TableColumn<User, Void> actionCol = new TableColumn<>("Action");
-        actionCol.setCellFactory(col -> new TableCell<>() {
-            private final Button delBtn = new Button("Delete");
-            {
-                delBtn.getStyleClass().add("delete-btn");
-                delBtn.setOnAction(e -> {
-                    User u = getTableView().getItems().get(getIndex());
-                    dao.deleteUser(u.getId());
-                    userList.setAll(dao.getAllUsers());
-                });
-            }
+        if(SessionManager.getCurrentUser().getRole() == User.Role.ADMIN) {
+            TableColumn<User, Void> actionCol = new TableColumn<>("Actions");
+            actionCol.setCellFactory(col -> new TableCell<>() {
+                private final Button delBtn = new Button("X");
+                private final HBox btnBox = new HBox(10, delBtn);
 
-            @Override
-            protected void updateItem(Void item, boolean empty){
-                super.updateItem(item, empty);
-                if(empty) {
-                    setGraphic(null);
-                }else{
-                    setGraphic(delBtn);
+                {
+                    delBtn.getStyleClass().add("delete-btn");
+                    delBtn.setOnAction(e -> {
+                        User u = getTableView().getItems().get(getIndex());
+                        dao.deleteUser(u.getId());
+                        logger.log(Level.INFO, "User deleted: userId={}", u.getId());
+                        userList.setAll(dao.getAllUsers());
+                    });
+                    btnBox.setAlignment(Pos.CENTER);
                 }
-            }
-        });
-        idCol.setMinWidth(50);
-        idCol.setMaxWidth(50);
-        nameCol.setPrefWidth(150);
-        emailCol.setPrefWidth(200);
-        actionCol.setPrefWidth(200);
 
-        table.getColumns().addAll(idCol, nameCol, emailCol, actionCol);
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(btnBox);
+                    }
+                }
+            });
+            table.getColumns().addAll(idCol, nameCol, emailCol, actionCol);
+        }else{
+            table.getColumns().addAll(idCol, nameCol, emailCol);
+        }
 
-        TextField nameField = new TextField();
-        nameField.setPromptText("Name");
 
-        TextField emailField = new TextField();
-        emailField.setPromptText("Email");
+        // Bottom Add Form
+        HBox form = new HBox(15);
+        if(SessionManager.getCurrentUser().getRole() == User.Role.ADMIN) {
+            form.setPadding(new Insets(20));
+            form.setAlignment(Pos.CENTER_LEFT);
+            form.getStyleClass().add("card");
 
-        TextField passwordField = new TextField();
-        passwordField.setPromptText("Password");
+            TextField nameField = new TextField();
+            nameField.setPromptText("Name");
 
-        Button addBtn = new Button("Add");
-        addBtn.setOnAction(e -> {
-            String name = nameField.getText();
-            Email email = null;
-            String password = passwordField.getText();
+            TextField emailField = new TextField();
+            emailField.setPromptText("Email");
 
-            try {
-                email = new Email(emailField.getText());
-            }catch (InvalidEmailAdressException ee) {
-                ErrorDialog.showError("Invalid email adress!", "Email must be in format 'user@example.com'");
-            }
+            TextField passwordField = new TextField();
+            passwordField.setPromptText("Password");
 
-            if(name != null && password != null && email != null) {
+            Button addBtn = new Button("Add User");
+            addBtn.setOnAction(e -> {
+                String name = nameField.getText();
+                Email email = null;
+                String password = passwordField.getText();
+
                 try {
-                    User u = new User(name, email, password);
-                    dao.addUser(u);
-                    nameField.clear();
-                    emailField.clear();
-                    passwordField.clear();
-                }catch (InvalidPasswordException pe) {
-                    ErrorDialog.showError("Invalid password!", "Password must be at least 8 characters long, contain one uppercase letter and one digit");
+                    email = new Email(emailField.getText());
+                } catch (InvalidEmailAdressException ee) {
+                    ErrorDialog.showError("Invalid email adress!", "Email must be in format 'user@example.com'");
+                    return;
                 }
-                userList.setAll(dao.getAllUsers());
-            }
-        });
-        addBtn.getStyleClass().add("add-btn");
 
-        Button projectsBtn = new Button("Projects");
-        projectsBtn.setOnAction(e -> {
-            new ProjectView(dao.getConnection()).show(stage);
-        });
-        Button accountBtn = new Button("Your Account");
-        accountBtn.setOnAction(e -> {
-            new AccountScreen(dao.getConnection()).show(stage);
-        });
+                if (name != null && password != null && email != null) {
+                    try {
+                        User u = new User(name, email, password);
+                        dao.addUser(u);
+                        logger.log(Level.INFO, "User added successfully: userId={}",
+                                dao.getUserByEmail(u.getEmail().toString()).getId());
+                        nameField.clear();
+                        emailField.clear();
+                        passwordField.clear();
+                        userList.setAll(dao.getAllUsers());
+                    } catch (InvalidPasswordException pe) {
+                        ErrorDialog.showError("Invalid password!",
+                                "Password must be at least 8 characters long, contain one uppercase letter and one digit");
+                    }
+                }
+            });
+            form.getChildren().addAll(nameField, emailField, passwordField, addBtn);
+            HBox.setHgrow(nameField, Priority.ALWAYS);
+            HBox.setHgrow(emailField, Priority.ALWAYS);
+            HBox.setHgrow(passwordField, Priority.ALWAYS);
+        }
 
-        BorderPane root = new BorderPane();
-        BorderPane menu = new BorderPane();
 
-        HBox form = new HBox(10, nameField, emailField, passwordField, addBtn);
-        form.setPadding(new Insets(15));
-        root.setBottom(form);
+        VBox centerLayout = new VBox(20);
+        centerLayout.setPadding(new Insets(20));
+        centerLayout.getChildren().addAll(table, form);
+        root.setCenter(centerLayout);
 
-        HBox menuBtns = new HBox(100, projectsBtn, accountBtn);
-        menuBtns.setAlignment(Pos.CENTER);
-        menuBtns.setPadding(new Insets(15));
-        menu.setBottom(menuBtns);
-
-        VBox tableBox = new VBox(10, table);
-        tableBox.setPadding(new Insets(15));
-        root.setCenter(table);
-
-        Label title = new Label("To-Do App");
-        title.getStyleClass().add("title");
-        menu.setCenter(title);
-
-        root.setTop(menu);
-
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1000, 700);
         scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("Users");
         stage.show();
-
     }
-
-
 }
